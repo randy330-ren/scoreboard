@@ -12,9 +12,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
-    <!-- PeerJS (用於區域網路 WebRTC P2P 直連) -->
+    <!-- PeerJS -->
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
-    <!-- QRCode.js (生成 QR Code) -->
+    <!-- QRCode.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
     <style>
@@ -63,7 +63,7 @@
 </head>
 <body class="h-full w-full bg-black text-white relative flex flex-col justify-between font-ui overflow-hidden">
 
-    <!-- Minimal Floating Top Control Toolbar -->
+    <!-- Floating Top Control Toolbar -->
     <header class="absolute top-0 left-0 right-0 z-30 flex items-center justify-between p-3 md:p-5 pointer-events-none transition-opacity duration-300 opacity-70 hover:opacity-100">
         <div class="pointer-events-auto flex items-center space-x-2">
             <button onclick="swapTeams()" class="glass-panel p-3 rounded-2xl text-slate-300/70 hover:text-white transition active:scale-90 flex items-center justify-center shadow-lg md:hidden" title="隊伍對調">
@@ -79,14 +79,14 @@
             <button onclick="toggleFullscreenMode()" class="glass-panel p-3 rounded-2xl text-slate-300/70 hover:text-white transition active:scale-90 flex items-center justify-center shadow-lg" title="全螢幕模式">
                 <i class="fa-solid fa-expand text-base"></i>
             </button>
-            <button onclick="toggleSettingsDrawer()" class="glass-panel p-3 rounded-2xl text-slate-300/70 hover:text-white transition active:scale-90 flex items-center justify-center shadow-lg" title="設定選單">
+            <button onclick="openDrawer('mainSettingsDrawer')" class="glass-panel p-3 rounded-2xl text-slate-300/70 hover:text-white transition active:scale-90 flex items-center justify-center shadow-lg" title="設定選單">
                 <i class="fa-solid fa-gear text-base"></i>
             </button>
         </div>
     </header>
 
     <!-- Overlay Backdrop -->
-    <div id="drawerOverlay" onclick="toggleSettingsDrawer()" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 hidden transition-opacity duration-300"></div>
+    <div id="drawerOverlay" onclick="closeAllDrawers()" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 hidden transition-opacity duration-300"></div>
 
     <!-- Main Scoreboard Area -->
     <main class="h-full w-full flex flex-col md:flex-row items-stretch justify-center relative overflow-hidden">
@@ -106,13 +106,13 @@
             </div>
 
             <div class="w-full flex justify-start z-10 pb-1 md:pb-2 pointer-events-auto">
-                <button onclick="handleDecrease('A', event)" class="px-3.5 py-1.5 rounded-xl bg-black/40 hover:bg-black/60 text-white/70 font-bold text-xs md:text-sm backdrop-blur-md border border-white/10 active:scale-90 transition flex items-center gap-1.5 shadow-md">
+                <button id="btnMinusA" onclick="handleDecrease('A', event)" class="px-3.5 py-1.5 rounded-xl bg-black/40 hover:bg-black/60 text-white/70 font-bold text-xs md:text-sm backdrop-blur-md border border-white/10 active:scale-90 transition flex items-center gap-1.5 shadow-md">
                     <i class="fa-solid fa-minus text-[10px]"></i> 減分
                 </button>
             </div>
         </section>
 
-        <!-- VS Badge & Controls -->
+        <!-- VS Badge -->
         <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none hidden md:flex flex-col items-center gap-3">
             <span class="font-score text-2xl font-black text-white/30 bg-black/60 border border-white/10 px-3.5 py-0.5 rounded-full backdrop-blur-md shadow-2xl">
                 VS
@@ -141,7 +141,7 @@
             </div>
 
             <div class="w-full flex justify-end z-10 pb-1 md:pb-2 pointer-events-auto">
-                <button onclick="handleDecrease('B', event)" class="px-3.5 py-1.5 rounded-xl bg-black/40 hover:bg-black/60 text-white/70 font-bold text-xs md:text-sm backdrop-blur-md border border-white/10 active:scale-90 transition flex items-center gap-1.5 shadow-md">
+                <button id="btnMinusB" onclick="handleDecrease('B', event)" class="px-3.5 py-1.5 rounded-xl bg-black/40 hover:bg-black/60 text-white/70 font-bold text-xs md:text-sm backdrop-blur-md border border-white/10 active:scale-90 transition flex items-center gap-1.5 shadow-md">
                     <i class="fa-solid fa-minus text-[10px]"></i> 減分
                 </button>
             </div>
@@ -149,19 +149,19 @@
 
     </main>
 
-    <!-- Settings Drawer -->
-    <aside id="settingsDrawer" class="fixed inset-y-0 right-0 w-full max-w-xs bg-slate-950/95 border-l border-slate-800 p-6 z-50 transform translate-x-full transition-transform duration-300 ease-in-out backdrop-blur-2xl flex flex-col shadow-2xl overflow-hidden">
+    <!-- 1. 主設定 Drawer -->
+    <aside id="mainSettingsDrawer" class="fixed inset-y-0 right-0 w-full max-w-xs bg-slate-950/95 border-l border-slate-800 p-6 z-50 transform translate-x-full transition-transform duration-300 ease-in-out backdrop-blur-2xl flex flex-col shadow-2xl overflow-hidden">
         
         <div class="flex items-center justify-between pb-4 border-b border-slate-800 flex-shrink-0">
             <h3 class="text-lg font-bold text-white/80 flex items-center gap-2">
                 <i class="fa-solid fa-sliders text-cyan-400/80"></i> 計分板設定
             </h3>
-            <button onclick="toggleSettingsDrawer()" class="text-slate-400/70 hover:text-white p-2 rounded-xl transition">
+            <button onclick="closeAllDrawers()" class="text-slate-400/70 hover:text-white p-2 rounded-xl transition">
                 <i class="fa-solid fa-xmark text-xl"></i>
             </button>
         </div>
 
-        <div class="flex-grow overflow-y-auto custom-scrollbar my-4 pr-1 space-y-6 text-sm">
+        <div class="flex-grow overflow-y-auto custom-scrollbar my-4 pr-1 space-y-4 text-sm">
             
             <!-- P2P Local Network Sync Section -->
             <div class="p-3.5 rounded-2xl bg-cyan-950/30 border border-cyan-800/50 space-y-3">
@@ -171,7 +171,7 @@
                 
                 <div id="p2pControls" class="space-y-2">
                     <button onclick="initP2pHost()" class="w-full py-2 px-3 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-xl transition text-xs flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-qrcode"></i> 建立房間 (產生 QR Code)
+                        <i class="fa-solid fa-qrcode"></i> 建立房間 (做為主控台)
                     </button>
                     <div class="flex gap-2">
                         <input type="text" id="joinRoomInput" placeholder="或輸入 4 位房號" maxlength="4" class="w-2/3 bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white uppercase focus:outline-none focus:border-cyan-500">
@@ -187,11 +187,10 @@
                         <span id="currentRoomCode" class="font-mono font-black text-base text-cyan-400">----</span>
                     </div>
 
-                    <!-- QR Code Container -->
                     <div id="qrcodeBox" class="bg-white p-3 rounded-2xl flex flex-col items-center justify-center shadow-lg my-2 mx-auto w-fit">
                         <div id="qrcode"></div>
                     </div>
-                    <p class="text-[11px] text-slate-400">讓另一台手機連上同一個熱點/Wi-Fi，並掃描上方 QR Code 即可自動連線</p>
+                    <p class="text-[11px] text-slate-400">掃描上方 QR Code 或輸入房號即可連線</p>
 
                     <button onclick="disconnectP2p()" class="w-full py-1.5 bg-rose-950/50 hover:bg-rose-900/60 text-rose-300 border border-rose-800/40 font-bold rounded-xl transition text-[11px]">
                         中斷 P2P 連線
@@ -199,25 +198,32 @@
                 </div>
             </div>
 
-            <!-- Team A Settings -->
-            <div class="space-y-2">
-                <label class="text-xs font-bold text-slate-400/70 uppercase tracking-wider block">隊伍 A</label>
-                <input type="text" id="inputNameA" value="藍隊" oninput="updateSettingsFromInputs()" placeholder="隊伍名稱" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-white/90 font-semibold focus:outline-none focus:border-cyan-500 mb-2">
-                <div class="flex items-center justify-between gap-2 bg-slate-900/60 p-2 rounded-xl border border-slate-800">
-                    <span class="text-xs text-slate-300/70">背景顏色</span>
-                    <input type="color" id="inputColorA" value="#2563eb" onchange="updateSettingsFromInputs()" class="w-9 h-9 rounded-lg bg-slate-900 border border-slate-700 cursor-pointer p-0.5">
+            <!-- 主控台獨有設定 (僅做為主控台 Host 且已建立連線/房間時顯示) -->
+            <div id="hostControls" class="hidden p-3.5 rounded-2xl bg-amber-950/30 border border-amber-800/50 space-y-2">
+                <label class="text-xs font-bold text-amber-400 uppercase tracking-wider block flex items-center gap-1.5">
+                    <i class="fa-solid fa-crown"></i> 主控台權限設定
+                </label>
+                <div class="flex items-center justify-between pt-1">
+                    <span class="text-xs text-slate-300">允許從屬設備控制分數</span>
+                    <input type="checkbox" id="toggleClientControl" checked onchange="updateHostPermissions()" class="w-5 h-5 accent-amber-500 cursor-pointer">
                 </div>
             </div>
 
-            <!-- Team B Settings -->
-            <div class="space-y-2">
-                <label class="text-xs font-bold text-slate-400/70 uppercase tracking-wider block">隊伍 B</label>
-                <input type="text" id="inputNameB" value="紅隊" oninput="updateSettingsFromInputs()" placeholder="隊伍名稱" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-white/90 font-semibold focus:outline-none focus:border-rose-500 mb-2">
-                <div class="flex items-center justify-between gap-2 bg-slate-900/60 p-2 rounded-xl border border-slate-800">
-                    <span class="text-xs text-slate-300/70">背景顏色</span>
-                    <input type="color" id="inputColorB" value="#e11d48" onchange="updateSettingsFromInputs()" class="w-9 h-9 rounded-lg bg-slate-900 border border-slate-700 cursor-pointer p-0.5">
-                </div>
-            </div>
+            <!-- 開啟「預設配色庫」抽屜按鈕 -->
+            <button onclick="openDrawer('presetDrawer')" class="w-full p-3 rounded-2xl bg-slate-900 border border-slate-800 hover:border-slate-700 flex items-center justify-between text-slate-200 transition font-semibold text-xs">
+                <span class="flex items-center gap-2">
+                    <i class="fa-solid fa-palette text-cyan-400"></i> 建議配色方案
+                </span>
+                <i class="fa-solid fa-chevron-right text-xs text-slate-500"></i>
+            </button>
+
+            <!-- 開啟「隊伍與視覺設定」抽屜按鈕 -->
+            <button onclick="openDrawer('teamSettingsDrawer')" class="w-full p-3 rounded-2xl bg-slate-900 border border-slate-800 hover:border-slate-700 flex items-center justify-between text-slate-200 transition font-semibold text-xs">
+                <span class="flex items-center gap-2">
+                    <i class="fa-solid fa-pen-to-square text-rose-400"></i> 隊伍名稱與顏色自訂
+                </span>
+                <i class="fa-solid fa-chevron-right text-xs text-slate-500"></i>
+            </button>
 
             <!-- Sound FX -->
             <div class="flex items-center justify-between p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800">
@@ -230,6 +236,106 @@
             <button onclick="resetScores()" class="w-full py-2.5 bg-rose-600/20 hover:bg-rose-600/30 text-rose-300/80 border border-rose-500/30 font-bold rounded-2xl transition text-xs font-ui">
                 重置分數歸零
             </button>
+        </div>
+    </aside>
+
+    <!-- 2. 預設配色庫 Drawer -->
+    <aside id="presetDrawer" class="fixed inset-y-0 right-0 w-full max-w-xs bg-slate-950/95 border-l border-slate-800 p-6 z-50 transform translate-x-full transition-transform duration-300 ease-in-out backdrop-blur-2xl flex flex-col shadow-2xl overflow-hidden">
+        <div class="flex items-center justify-between pb-4 border-b border-slate-800 flex-shrink-0">
+            <button onclick="openDrawer('mainSettingsDrawer')" class="text-slate-400 hover:text-white flex items-center gap-1.5 text-xs font-bold">
+                <i class="fa-solid fa-chevron-left"></i> 返回
+            </button>
+            <h3 class="text-base font-bold text-white/80">預設配色方案</h3>
+            <button onclick="closeAllDrawers()" class="text-slate-400/70 hover:text-white p-1 rounded-xl transition">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+
+        <div class="flex-grow overflow-y-auto custom-scrollbar my-4 space-y-3 pr-1 text-xs">
+            <!-- 配色卡片 1 -->
+            <button onclick="applyPreset('#2563eb', '#e11d48', '#ffffff', '#ffffff')" class="w-full p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-cyan-500/50 flex items-center justify-between transition group">
+                <span class="font-bold text-slate-200">經典對決 (藍/紅)</span>
+                <div class="flex items-center gap-1.5">
+                    <span class="w-6 h-6 rounded-full border border-white/20" style="background-color: #2563eb;"></span>
+                    <span class="w-6 h-6 rounded-full border border-white/20" style="background-color: #e11d48;"></span>
+                </div>
+            </button>
+
+            <!-- 配色卡片 2 -->
+            <button onclick="applyPreset('#06b6d4', '#f43f5e', '#ffffff', '#ffffff')" class="w-full p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-cyan-500/50 flex items-center justify-between transition group">
+                <span class="font-bold text-slate-200">霓虹夜彩 (青/粉)</span>
+                <div class="flex items-center gap-1.5">
+                    <span class="w-6 h-6 rounded-full border border-white/20" style="background-color: #06b6d4;"></span>
+                    <span class="w-6 h-6 rounded-full border border-white/20" style="background-color: #f43f5e;"></span>
+                </div>
+            </button>
+
+            <!-- 配色卡片 3 -->
+            <button onclick="applyPreset('#059669', '#d97706', '#ffffff', '#ffffff')" class="w-full p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-cyan-500/50 flex items-center justify-between transition group">
+                <span class="font-bold text-slate-200">活力賽事 (綠/橙)</span>
+                <div class="flex items-center gap-1.5">
+                    <span class="w-6 h-6 rounded-full border border-white/20" style="background-color: #059669;"></span>
+                    <span class="w-6 h-6 rounded-full border border-white/20" style="background-color: #d97706;"></span>
+                </div>
+            </button>
+
+            <!-- 配色卡片 4 -->
+            <button onclick="applyPreset('#1e293b', '#6b21a8', '#38bdf8', '#f472b6')" class="w-full p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-cyan-500/50 flex items-center justify-between transition group">
+                <span class="font-bold text-slate-200">極光暗黑 (黑/紫)</span>
+                <div class="flex items-center gap-1.5">
+                    <span class="w-6 h-6 rounded-full border border-white/20 flex items-center justify-center text-[10px]" style="background-color: #1e293b; color: #38bdf8;">8</span>
+                    <span class="w-6 h-6 rounded-full border border-white/20 flex items-center justify-center text-[10px]" style="background-color: #6b21a8; color: #f472b6;">8</span>
+                </div>
+            </button>
+        </div>
+    </aside>
+
+    <!-- 3. 隊伍與視覺設定 Drawer -->
+    <aside id="teamSettingsDrawer" class="fixed inset-y-0 right-0 w-full max-w-xs bg-slate-950/95 border-l border-slate-800 p-6 z-50 transform translate-x-full transition-transform duration-300 ease-in-out backdrop-blur-2xl flex flex-col shadow-2xl overflow-hidden">
+        <div class="flex items-center justify-between pb-4 border-b border-slate-800 flex-shrink-0">
+            <button onclick="openDrawer('mainSettingsDrawer')" class="text-slate-400 hover:text-white flex items-center gap-1.5 text-xs font-bold">
+                <i class="fa-solid fa-chevron-left"></i> 返回
+            </button>
+            <h3 class="text-base font-bold text-white/80">隊伍與視覺設定</h3>
+            <button onclick="closeAllDrawers()" class="text-slate-400/70 hover:text-white p-1 rounded-xl transition">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+
+        <div class="flex-grow overflow-y-auto custom-scrollbar my-4 space-y-6 pr-1 text-xs">
+            <!-- Team A Settings -->
+            <div class="space-y-3 bg-slate-900/50 p-3.5 rounded-2xl border border-slate-800">
+                <label class="text-xs font-bold text-cyan-400 uppercase tracking-wider block">隊伍 A</label>
+                <div>
+                    <span class="text-[11px] text-slate-400 block mb-1">隊伍名稱</span>
+                    <input type="text" id="inputNameA" value="藍隊" oninput="updateSettingsFromInputs()" placeholder="隊伍名稱" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-white/90 font-semibold focus:outline-none focus:border-cyan-500">
+                </div>
+                <div class="flex items-center justify-between gap-2">
+                    <span class="text-slate-300">背景顏色</span>
+                    <input type="color" id="inputColorA" value="#2563eb" onchange="updateSettingsFromInputs()" class="w-8 h-8 rounded-lg bg-slate-900 border border-slate-700 cursor-pointer p-0.5">
+                </div>
+                <div class="flex items-center justify-between gap-2">
+                    <span class="text-slate-300">分數字體顏色</span>
+                    <input type="color" id="inputTextColorA" value="#ffffff" onchange="updateSettingsFromInputs()" class="w-8 h-8 rounded-lg bg-slate-900 border border-slate-700 cursor-pointer p-0.5">
+                </div>
+            </div>
+
+            <!-- Team B Settings -->
+            <div class="space-y-3 bg-slate-900/50 p-3.5 rounded-2xl border border-slate-800">
+                <label class="text-xs font-bold text-rose-400 uppercase tracking-wider block">隊伍 B</label>
+                <div>
+                    <span class="text-[11px] text-slate-400 block mb-1">隊伍名稱</span>
+                    <input type="text" id="inputNameB" value="紅隊" oninput="updateSettingsFromInputs()" placeholder="隊伍名稱" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-white/90 font-semibold focus:outline-none focus:border-rose-500">
+                </div>
+                <div class="flex items-center justify-between gap-2">
+                    <span class="text-slate-300">背景顏色</span>
+                    <input type="color" id="inputColorB" value="#e11d48" onchange="updateSettingsFromInputs()" class="w-8 h-8 rounded-lg bg-slate-900 border border-slate-700 cursor-pointer p-0.5">
+                </div>
+                <div class="flex items-center justify-between gap-2">
+                    <span class="text-slate-300">分數字體顏色</span>
+                    <input type="color" id="inputTextColorB" value="#ffffff" onchange="updateSettingsFromInputs()" class="w-8 h-8 rounded-lg bg-slate-900 border border-slate-700 cursor-pointer p-0.5">
+                </div>
+            </div>
         </div>
     </aside>
 
@@ -263,19 +369,25 @@
             aName: '藍隊',
             aScore: 0,
             aColor: '#2563eb',
+            aTextColor: '#ffffff',
             bName: '紅隊',
             bScore: 0,
-            bColor: '#e11d48'
+            bColor: '#e11d48',
+            bTextColor: '#ffffff',
+            isHost: false,
+            allowClientControl: true
         };
 
         function initScoreboardState() {
             const savedState = localStorage.getItem('ultra_scoreboard_state');
             if (savedState) {
-                try { state = { ...state, ...JSON.parse(savedState) }; } catch(e) {}
+                try { 
+                    const parsed = JSON.parse(savedState);
+                    state = { ...state, ...parsed, isHost: false }; // 每次初始化預設非 Host
+                } catch(e) {}
             }
             renderScoreboardUI();
             
-            // 自動讀取網址的 room 參數進行自動 P2P 連線
             const urlParams = new URLSearchParams(window.location.search);
             const autoRoom = urlParams.get('room');
             if (autoRoom && autoRoom.length === 4) {
@@ -294,8 +406,12 @@
             document.getElementById('displayLabelA').innerText = state.aName;
             document.getElementById('displayLabelB').innerText = state.bName;
 
-            document.getElementById('scoreTextA').innerText = state.aScore;
-            document.getElementById('scoreTextB').innerText = state.bScore;
+            const scoreA = document.getElementById('scoreTextA');
+            const scoreB = document.getElementById('scoreTextB');
+            scoreA.innerText = state.aScore;
+            scoreB.innerText = state.bScore;
+            scoreA.style.color = state.aTextColor || '#ffffff';
+            scoreB.style.color = state.bTextColor || '#ffffff';
 
             document.getElementById('zoneA').style.backgroundColor = state.aColor;
             document.getElementById('zoneB').style.backgroundColor = state.bColor;
@@ -304,9 +420,43 @@
             document.getElementById('inputNameB').value = state.bName;
             document.getElementById('inputColorA').value = state.aColor;
             document.getElementById('inputColorB').value = state.bColor;
+            document.getElementById('inputTextColorA').value = state.aTextColor || '#ffffff';
+            document.getElementById('inputTextColorB').value = state.bTextColor || '#ffffff';
+
+            document.getElementById('toggleClientControl').checked = state.allowClientControl;
+
+            renderControlPermissions();
+        }
+
+        function renderControlPermissions() {
+            // 如果不是 Host 且 Host 不允許 Client 控制，則禁用點擊與減分按鈕
+            const isControlDisabled = !state.isHost && !state.allowClientControl && p2pConn;
+            
+            const zoneA = document.getElementById('clickZoneA');
+            const zoneB = document.getElementById('clickZoneB');
+            const btnMinusA = document.getElementById('btnMinusA');
+            const btnMinusB = document.getElementById('btnMinusB');
+
+            if (isControlDisabled) {
+                zoneA.style.pointerEvents = 'none';
+                zoneB.style.pointerEvents = 'none';
+                btnMinusA.style.pointerEvents = 'none';
+                btnMinusB.style.pointerEvents = 'none';
+                zoneA.style.opacity = '0.7';
+                zoneB.style.opacity = '0.7';
+            } else {
+                zoneA.style.pointerEvents = 'auto';
+                zoneB.style.pointerEvents = 'auto';
+                btnMinusA.style.pointerEvents = 'auto';
+                btnMinusB.style.pointerEvents = 'auto';
+                zoneA.style.opacity = '1';
+                zoneB.style.opacity = '1';
+            }
         }
 
         function updateScore(teamKey, delta, isFromRemote = false) {
+            if (!state.isHost && !state.allowClientControl && p2pConn && !isFromRemote) return;
+
             const isTeamA = teamKey === 'A';
             const currentVal = isTeamA ? state.aScore : state.bScore;
             const newVal = Math.max(0, currentVal + delta);
@@ -337,9 +487,9 @@
         }
 
         function swapTeams() {
-            const tempName = state.aName, tempScore = state.aScore, tempColor = state.aColor;
-            state.aName = state.bName; state.aScore = state.bScore; state.aColor = state.bColor;
-            state.bName = tempName; state.bScore = tempScore; state.bColor = tempColor;
+            const tempName = state.aName, tempScore = state.aScore, tempColor = state.aColor, tempTextColor = state.aTextColor;
+            state.aName = state.bName; state.aScore = state.bScore; state.aColor = state.bColor; state.aTextColor = state.bTextColor;
+            state.bName = tempName; state.bScore = tempScore; state.bColor = tempColor; state.bTextColor = tempTextColor;
 
             playBeepSound(520, 0.1);
             renderScoreboardUI();
@@ -360,13 +510,33 @@
             state.bName = document.getElementById('inputNameB').value.trim() || '紅隊';
             state.aColor = document.getElementById('inputColorA').value;
             state.bColor = document.getElementById('inputColorB').value;
+            state.aTextColor = document.getElementById('inputTextColorA').value;
+            state.bTextColor = document.getElementById('inputTextColorB').value;
 
             renderScoreboardUI();
             saveScoreboardState();
             broadcastP2pData({ type: 'STATE_SYNC', state: state });
         }
 
-        // --- P2P WebRTC Local Network Sync ---
+        function applyPreset(colorA, colorB, textColorA = '#ffffff', textColorB = '#ffffff') {
+            state.aColor = colorA;
+            state.bColor = colorB;
+            state.aTextColor = textColorA;
+            state.bTextColor = textColorB;
+
+            renderScoreboardUI();
+            saveScoreboardState();
+            broadcastP2pData({ type: 'STATE_SYNC', state: state });
+        }
+
+        function updateHostPermissions() {
+            if (!state.isHost) return;
+            state.allowClientControl = document.getElementById('toggleClientControl').checked;
+            renderScoreboardUI();
+            broadcastP2pData({ type: 'STATE_SYNC', state: state });
+        }
+
+        // --- P2P WebRTC Sync ---
         let peer = null;
         let p2pConn = null;
         let qrCodeObj = null;
@@ -410,12 +580,15 @@
             peer = new Peer(fullRoomId);
 
             peer.on('open', (id) => {
+                state.isHost = true;
                 updateP2pStatusUI('connected', `房間: ${roomCode}`);
                 document.getElementById('currentRoomCode').innerText = roomCode;
                 document.getElementById('p2pControls').classList.add('hidden');
                 document.getElementById('p2pInfo').classList.remove('hidden');
+                document.getElementById('hostControls').classList.remove('hidden');
 
                 generateRoomQRCode(roomCode);
+                renderScoreboardUI();
             });
 
             peer.on('connection', (conn) => {
@@ -440,12 +613,13 @@
             peer = new Peer();
 
             peer.on('open', () => {
+                state.isHost = false;
                 p2pConn = peer.connect('sb-p2p-' + code);
                 setupP2pHandlers();
             });
 
             peer.on('error', () => {
-                alert('連線失敗，請確認兩台手機是否連上同一個 Wi-Fi 或熱點');
+                alert('連線失敗，請確認房號或網路狀態');
                 updateP2pStatusUI('disconnected', '單機模式');
             });
         }
@@ -457,12 +631,16 @@
                 document.getElementById('p2pInfo').classList.remove('hidden');
                 document.getElementById('currentRoomCode').innerText = '已連線';
                 
-                broadcastP2pData({ type: 'STATE_SYNC', state: state });
+                if (state.isHost) {
+                    broadcastP2pData({ type: 'STATE_SYNC', state: state });
+                }
             });
 
             p2pConn.on('data', (data) => {
                 if (data.type === 'SCORE_UPDATE' || data.type === 'STATE_SYNC') {
-                    state = { ...state, ...data.state };
+                    // 保留本地 isHost 身份
+                    const currentIsHost = state.isHost;
+                    state = { ...state, ...data.state, isHost: currentIsHost };
                     renderScoreboardUI();
                     saveScoreboardState();
                     playBeepSound(600, 0.05);
@@ -486,11 +664,41 @@
             if (peer) peer.destroy();
             p2pConn = null;
             peer = null;
+            state.isHost = false;
 
             updateP2pStatusUI('disconnected', '單機模式');
             document.getElementById('p2pControls').classList.remove('hidden');
             document.getElementById('p2pInfo').classList.add('hidden');
+            document.getElementById('hostControls').classList.add('hidden');
             document.getElementById('qrcode').innerHTML = '';
+
+            renderScoreboardUI();
+        }
+
+        // --- Drawer Control System ---
+        const drawers = ['mainSettingsDrawer', 'presetDrawer', 'teamSettingsDrawer'];
+
+        function openDrawer(drawerId) {
+            const overlay = document.getElementById('drawerOverlay');
+            overlay.classList.remove('hidden');
+
+            drawers.forEach(id => {
+                const elem = document.getElementById(id);
+                if (id === drawerId) {
+                    elem.classList.remove('translate-x-full');
+                } else {
+                    elem.classList.add('translate-x-full');
+                }
+            });
+        }
+
+        function closeAllDrawers() {
+            const overlay = document.getElementById('drawerOverlay');
+            overlay.classList.add('hidden');
+
+            drawers.forEach(id => {
+                document.getElementById(id).classList.add('translate-x-full');
+            });
         }
 
         function bindClickZones(clickZoneId, teamKey) {
@@ -525,20 +733,6 @@
                     updateScore(teamKey, 1);
                 }
             });
-        }
-
-        function toggleSettingsDrawer() {
-            const drawer = document.getElementById('settingsDrawer');
-            const overlay = document.getElementById('drawerOverlay');
-            const isOpen = !drawer.classList.contains('translate-x-full');
-
-            if (isOpen) {
-                drawer.classList.add('translate-x-full');
-                overlay.classList.add('hidden');
-            } else {
-                drawer.classList.remove('translate-x-full');
-                overlay.classList.remove('hidden');
-            }
         }
 
         function toggleFullscreenMode() {

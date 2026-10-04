@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>極簡離線區域網路同步計分板</title>
+    <title>極簡離線區域網路同步計分板 - 賽事控制中心</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
@@ -92,7 +92,7 @@
     <main class="h-full w-full flex flex-col md:flex-row items-stretch justify-center relative overflow-hidden">
         
         <!-- Team A Section -->
-        <section id="zoneA" class="score-zone flex-1 relative flex flex-col justify-between items-center p-4 md:p-6 select-none bg-blue-600/90 border-b-2 md:border-b-0 md:border-r-2 border-black/40">
+        <section id="zoneA" class="score-zone flex-1 relative flex flex-col justify-between items-center p-4 md:p-6 select-none bg-blue-600 border-b-2 md:border-b-0 md:border-r-2 border-black/40">
             <div class="w-full flex justify-start md:justify-end items-center z-10 pt-8 md:pt-4 px-2 md:px-6 pointer-events-none">
                 <h2 id="displayLabelA" class="text-2xl sm:text-3xl md:text-4xl font-black text-white/70 tracking-wider font-ui truncate max-w-[85%] drop-shadow-md">
                     藍隊
@@ -127,7 +127,7 @@
         </div>
 
         <!-- Team B Section -->
-        <section id="zoneB" class="score-zone flex-1 relative flex flex-col justify-between items-center p-4 md:p-6 select-none bg-rose-600/90">
+        <section id="zoneB" class="score-zone flex-1 relative flex flex-col justify-between items-center p-4 md:p-6 select-none bg-rose-600">
             <div class="w-full flex justify-between md:justify-start items-center z-10 pt-8 md:pt-4 px-2 md:px-6 pointer-events-none">
                 <h2 id="displayLabelB" class="text-2xl sm:text-3xl md:text-4xl font-black text-white/70 tracking-wider font-ui truncate max-w-[85%] drop-shadow-md">
                     紅隊
@@ -163,10 +163,10 @@
 
         <div class="flex-grow overflow-y-auto custom-scrollbar my-4 pr-1 space-y-4 text-sm">
             
-            <!-- P2P Local Network Sync Section -->
+            <!-- P2P Network Sync Section -->
             <div class="p-3.5 rounded-2xl bg-cyan-950/30 border border-cyan-800/50 space-y-3">
                 <label class="text-xs font-bold text-cyan-400 uppercase tracking-wider block flex items-center gap-1.5">
-                    <i class="fa-solid fa-wifi"></i> 離線局域網同步 (Wi-Fi/熱點)
+                    <i class="fa-solid fa-wifi"></i> 多裝置區域網路同步 (Wi-Fi/熱點)
                 </label>
                 
                 <div id="p2pControls" class="space-y-2">
@@ -198,14 +198,39 @@
                 </div>
             </div>
 
-            <!-- 主控台獨有設定 (僅做為主控台 Host 且已建立連線/房間時顯示) -->
-            <div id="hostControls" class="hidden p-3.5 rounded-2xl bg-amber-950/30 border border-amber-800/50 space-y-2">
+            <!-- Client 端權限狀態提示卡片 (僅 Client 連線時顯示) -->
+            <div id="clientPermissionNotice" class="hidden p-3 rounded-2xl bg-slate-900 border border-slate-800 text-xs space-y-1">
+                <div class="font-bold flex items-center gap-2" id="noticeTitle">
+                    <i class="fa-solid fa-shield-halved"></i> 權限狀態
+                </div>
+                <p class="text-[11px] text-slate-400" id="noticeDesc">等待主控台授權操作權限中...</p>
+            </div>
+
+            <!-- 主控台獨有設定 (僅 Host 且連線狀態時顯示) -->
+            <div id="hostControls" class="hidden p-3.5 rounded-2xl bg-amber-950/30 border border-amber-800/50 space-y-3">
                 <label class="text-xs font-bold text-amber-400 uppercase tracking-wider block flex items-center gap-1.5">
-                    <i class="fa-solid fa-crown"></i> 主控台權限設定
+                    <i class="fa-solid fa-crown"></i> 主控台全域權限
                 </label>
-                <div class="flex items-center justify-between pt-1">
-                    <span class="text-xs text-slate-300">允許從屬設備控制分數</span>
-                    <input type="checkbox" id="toggleClientControl" checked onchange="updateHostPermissions()" class="w-5 h-5 accent-amber-500 cursor-pointer">
+                <div class="space-y-2 pt-1 border-t border-amber-900/40">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-slate-300">預設允許從屬設備控制分數</span>
+                        <input type="checkbox" id="toggleGlobalScoreControl" checked onchange="updateHostGlobalPermissions()" class="w-4 h-4 accent-amber-500 cursor-pointer">
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-slate-300">允許從屬設備重置歸零</span>
+                        <input type="checkbox" id="toggleGlobalResetControl" onchange="updateHostGlobalPermissions()" class="w-4 h-4 accent-amber-500 cursor-pointer">
+                    </div>
+                </div>
+
+                <!-- 已連線設備管理清單 -->
+                <div class="pt-2 border-t border-amber-900/40 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[11px] font-bold text-amber-300/80">已連線設備清單</span>
+                        <span id="connectedCountBadge" class="text-[10px] bg-amber-900/60 text-amber-300 px-2 py-0.5 rounded-full font-mono">0 台</span>
+                    </div>
+                    <div id="connectedDeviceList" class="space-y-1.5 max-h-36 overflow-y-auto custom-scrollbar pr-1">
+                        <p class="text-[11px] text-slate-500 italic text-center py-2">尚無其他設備連線</p>
+                    </div>
                 </div>
             </div>
 
@@ -233,7 +258,7 @@
         </div>
 
         <div class="space-y-2 pt-4 border-t border-slate-800 flex-shrink-0">
-            <button onclick="resetScores()" class="w-full py-2.5 bg-rose-600/20 hover:bg-rose-600/30 text-rose-300/80 border border-rose-500/30 font-bold rounded-2xl transition text-xs font-ui">
+            <button id="btnResetScores" onclick="resetScores()" class="w-full py-2.5 bg-rose-600/20 hover:bg-rose-600/30 text-rose-300/80 border border-rose-500/30 font-bold rounded-2xl transition text-xs font-ui">
                 重置分數歸零
             </button>
         </div>
@@ -365,6 +390,7 @@
         }
 
         // --- Scoreboard State ---
+        let myPeerId = null;
         let state = {
             aName: '藍隊',
             aScore: 0,
@@ -375,7 +401,9 @@
             bColor: '#e11d48',
             bTextColor: '#ffffff',
             isHost: false,
-            allowClientControl: true
+            globalAllowScore: true,
+            globalAllowReset: false,
+            devicePermissions: {} // { peerId: { score: boolean, reset: boolean, alias: string } }
         };
 
         function initScoreboardState() {
@@ -383,7 +411,7 @@
             if (savedState) {
                 try { 
                     const parsed = JSON.parse(savedState);
-                    state = { ...state, ...parsed, isHost: false }; // 每次初始化預設非 Host
+                    state = { ...state, ...parsed, isHost: false };
                 } catch(e) {}
             }
             renderScoreboardUI();
@@ -400,6 +428,26 @@
 
         function saveScoreboardState() {
             localStorage.setItem('ultra_scoreboard_state', JSON.stringify(state));
+        }
+
+        // 檢查目前裝置是否具備分數控制權限
+        function checkCanScore() {
+            if (!p2pPeer) return true; // 單機模式允許
+            if (state.isHost) return true; // Host 永遠允許
+            if (state.devicePermissions[myPeerId]) {
+                return state.devicePermissions[myPeerId].score;
+            }
+            return state.globalAllowScore;
+        }
+
+        // 檢查目前裝置是否具備重置歸零權限
+        function checkCanReset() {
+            if (!p2pPeer) return true;
+            if (state.isHost) return true;
+            if (state.devicePermissions[myPeerId]) {
+                return state.devicePermissions[myPeerId].reset;
+            }
+            return state.globalAllowReset;
         }
 
         function renderScoreboardUI() {
@@ -423,48 +471,78 @@
             document.getElementById('inputTextColorA').value = state.aTextColor || '#ffffff';
             document.getElementById('inputTextColorB').value = state.bTextColor || '#ffffff';
 
-            document.getElementById('toggleClientControl').checked = state.allowClientControl;
+            document.getElementById('toggleGlobalScoreControl').checked = state.globalAllowScore;
+            document.getElementById('toggleGlobalResetControl').checked = state.globalAllowReset;
 
             renderControlPermissions();
         }
 
         function renderControlPermissions() {
-            // 如果不是 Host 且 Host 不允許 Client 控制，則禁用點擊與減分按鈕
-            const isControlDisabled = !state.isHost && !state.allowClientControl && p2pConn;
-            
+            const canScore = checkCanScore();
+            const canReset = checkCanReset();
+
             const zoneA = document.getElementById('clickZoneA');
             const zoneB = document.getElementById('clickZoneB');
             const btnMinusA = document.getElementById('btnMinusA');
             const btnMinusB = document.getElementById('btnMinusB');
+            const btnReset = document.getElementById('btnResetScores');
 
-            if (isControlDisabled) {
-                zoneA.style.pointerEvents = 'none';
-                zoneB.style.pointerEvents = 'none';
-                btnMinusA.style.pointerEvents = 'none';
-                btnMinusB.style.pointerEvents = 'none';
-                zoneA.style.opacity = '0.7';
-                zoneB.style.opacity = '0.7';
-            } else {
+            // 保持視覺 100% 飽和清晰，僅控制觸控可否點擊
+            if (canScore) {
                 zoneA.style.pointerEvents = 'auto';
                 zoneB.style.pointerEvents = 'auto';
                 btnMinusA.style.pointerEvents = 'auto';
                 btnMinusB.style.pointerEvents = 'auto';
-                zoneA.style.opacity = '1';
-                zoneB.style.opacity = '1';
+            } else {
+                zoneA.style.pointerEvents = 'none';
+                zoneB.style.pointerEvents = 'none';
+                btnMinusA.style.pointerEvents = 'none';
+                btnMinusB.style.pointerEvents = 'none';
+            }
+
+            // 重置按鈕權限 UI
+            if (canReset) {
+                btnReset.removeAttribute('disabled');
+                btnReset.classList.remove('opacity-40', 'cursor-not-allowed');
+            } else {
+                btnReset.setAttribute('disabled', 'true');
+                btnReset.classList.add('opacity-40', 'cursor-not-allowed');
+            }
+
+            // Client 端設定側欄權限提示卡片
+            const clientNotice = document.getElementById('clientPermissionNotice');
+            if (!state.isHost && p2pPeer) {
+                clientNotice.classList.remove('hidden');
+                const titleElem = document.getElementById('noticeTitle');
+                const descElem = document.getElementById('noticeDesc');
+
+                if (canScore && canReset) {
+                    titleElem.className = 'font-bold text-emerald-400 flex items-center gap-2';
+                    titleElem.innerHTML = '<i class="fa-solid fa-circle-check"></i> 完整控制權限';
+                    descElem.innerText = '主控台已授權：可加減分與重置分數。';
+                } else if (canScore) {
+                    titleElem.className = 'font-bold text-amber-400 flex items-center gap-2';
+                    titleElem.innerHTML = '<i class="fa-solid fa-pen-to-square"></i> 僅限計分權限';
+                    descElem.innerText = '可點擊加減分 (重置分數已被主控台鎖定)。';
+                } else {
+                    titleElem.className = 'font-bold text-rose-400 flex items-center gap-2';
+                    titleElem.innerHTML = '<i class="fa-solid fa-lock"></i> 僅限純觀看模式';
+                    descElem.innerText = '主控台已鎖定控制，目前畫面僅供即時觀賽。';
+                }
+            } else {
+                clientNotice.classList.add('hidden');
             }
         }
 
         function updateScore(teamKey, delta, isFromRemote = false) {
-            if (!state.isHost && !state.allowClientControl && p2pConn && !isFromRemote) return;
+            if (!isFromRemote && !checkCanScore()) return;
 
             const isTeamA = teamKey === 'A';
             const currentVal = isTeamA ? state.aScore : state.bScore;
             const newVal = Math.max(0, currentVal + delta);
 
-            if (isTeamA) state.aScore = newVal;
-            else state.bScore = newVal;
-
             if (newVal !== currentVal) {
+                state[isTeamA ? 'aScore' : 'bScore'] = newVal;
                 playBeepSound(delta > 0 ? 680 : 380, 0.08);
 
                 const scoreElem = document.getElementById(`scoreText${teamKey}`);
@@ -487,6 +565,7 @@
         }
 
         function swapTeams() {
+            if (!checkCanScore()) return;
             const tempName = state.aName, tempScore = state.aScore, tempColor = state.aColor, tempTextColor = state.aTextColor;
             state.aName = state.bName; state.aScore = state.bScore; state.aColor = state.bColor; state.aTextColor = state.bTextColor;
             state.bName = tempName; state.bScore = tempScore; state.bColor = tempColor; state.bTextColor = tempTextColor;
@@ -498,6 +577,7 @@
         }
 
         function resetScores() {
+            if (!checkCanReset()) return;
             state.aScore = 0; state.bScore = 0;
             playBeepSound(420, 0.12);
             renderScoreboardUI();
@@ -529,17 +609,34 @@
             broadcastP2pData({ type: 'STATE_SYNC', state: state });
         }
 
-        function updateHostPermissions() {
+        function updateHostGlobalPermissions() {
             if (!state.isHost) return;
-            state.allowClientControl = document.getElementById('toggleClientControl').checked;
+            state.globalAllowScore = document.getElementById('toggleGlobalScoreControl').checked;
+            state.globalAllowReset = document.getElementById('toggleGlobalResetControl').checked;
+
+            // 更新同步至所有設備
             renderScoreboardUI();
             broadcastP2pData({ type: 'STATE_SYNC', state: state });
         }
 
-        // --- P2P WebRTC Sync ---
-        let peer = null;
-        let p2pConn = null;
-        let qrCodeObj = null;
+        function toggleSingleDevicePermission(targetPeerId, permType) {
+            if (!state.isHost) return;
+            if (!state.devicePermissions[targetPeerId]) {
+                state.devicePermissions[targetPeerId] = {
+                    score: state.globalAllowScore,
+                    reset: state.globalAllowReset,
+                    alias: `設備 ${targetPeerId.substring(targetPeerId.length - 4)}`
+                };
+            }
+            state.devicePermissions[targetPeerId][permType] = !state.devicePermissions[targetPeerId][permType];
+
+            renderHostDeviceListUI();
+            broadcastP2pData({ type: 'STATE_SYNC', state: state });
+        }
+
+        // --- Multi-Client P2P WebRTC Core ---
+        let p2pPeer = null;
+        let peerConnections = {}; // Key: peerId, Value: connection
 
         function updateP2pStatusUI(status, text) {
             const dot = document.getElementById('statusDot');
@@ -562,7 +659,7 @@
             const qrContainer = document.getElementById('qrcode');
             qrContainer.innerHTML = '';
             
-            qrCodeObj = new QRCode(qrContainer, {
+            new QRCode(qrContainer, {
                 text: fullUrl,
                 width: 130,
                 height: 130,
@@ -572,14 +669,53 @@
             });
         }
 
+        function renderHostDeviceListUI() {
+            const container = document.getElementById('connectedDeviceList');
+            const peerIds = Object.keys(peerConnections);
+            document.getElementById('connectedCountBadge').innerText = `${peerIds.length} 台`;
+
+            if (peerIds.length === 0) {
+                container.innerHTML = '<p class="text-[11px] text-slate-500 italic text-center py-2">尚無其他設備連線</p>';
+                return;
+            }
+
+            container.innerHTML = peerIds.map((id, idx) => {
+                const shortId = id.substring(id.length - 4).toUpperCase();
+                const perm = state.devicePermissions[id] || {
+                    score: state.globalAllowScore,
+                    reset: state.globalAllowReset
+                };
+
+                return `
+                    <div class="p-2 rounded-xl bg-slate-900/90 border border-slate-800 flex items-center justify-between text-xs">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-mobile-screen text-amber-400"></i>
+                            <span class="font-mono text-[11px] text-slate-300">📱裝置 (${shortId})</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <label class="flex items-center gap-1 cursor-pointer" title="控制分數">
+                                <span class="text-[10px] text-slate-400">計分</span>
+                                <input type="checkbox" ${perm.score ? 'checked' : ''} onchange="toggleSingleDevicePermission('${id}', 'score')" class="w-3.5 h-3.5 accent-cyan-500">
+                            </label>
+                            <label class="flex items-center gap-1 cursor-pointer" title="重置歸零">
+                                <span class="text-[10px] text-slate-400">歸零</span>
+                                <input type="checkbox" ${perm.reset ? 'checked' : ''} onchange="toggleSingleDevicePermission('${id}', 'reset')" class="w-3.5 h-3.5 accent-rose-500">
+                            </label>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
         function initP2pHost() {
             const roomCode = Math.floor(1000 + Math.random() * 9000).toString();
             const fullRoomId = 'sb-p2p-' + roomCode;
 
             updateP2pStatusUI('connecting', '建立房間中...');
-            peer = new Peer(fullRoomId);
+            p2pPeer = new Peer(fullRoomId);
 
-            peer.on('open', (id) => {
+            p2pPeer.on('open', (id) => {
+                myPeerId = id;
                 state.isHost = true;
                 updateP2pStatusUI('connected', `房間: ${roomCode}`);
                 document.getElementById('currentRoomCode').innerText = roomCode;
@@ -589,14 +725,36 @@
 
                 generateRoomQRCode(roomCode);
                 renderScoreboardUI();
+                renderHostDeviceListUI();
             });
 
-            peer.on('connection', (conn) => {
-                p2pConn = conn;
-                setupP2pHandlers();
+            p2pPeer.on('connection', (conn) => {
+                conn.on('open', () => {
+                    peerConnections[conn.peer] = conn;
+
+                    if (!state.devicePermissions[conn.peer]) {
+                        state.devicePermissions[conn.peer] = {
+                            score: state.globalAllowScore,
+                            reset: state.globalAllowReset,
+                            alias: `設備 ${conn.peer.substring(conn.peer.length - 4)}`
+                        };
+                    }
+
+                    renderHostDeviceListUI();
+                    broadcastP2pData({ type: 'STATE_SYNC', state: state });
+                });
+
+                conn.on('data', (data) => {
+                    handleIncomingData(data, conn.peer);
+                });
+
+                conn.on('close', () => {
+                    delete peerConnections[conn.peer];
+                    renderHostDeviceListUI();
+                });
             });
 
-            peer.on('error', () => {
+            p2pPeer.on('error', () => {
                 alert('建立房間失敗，請再試一次');
                 updateP2pStatusUI('disconnected', '單機模式');
             });
@@ -610,60 +768,73 @@
             }
 
             updateP2pStatusUI('connecting', '連線中...');
-            peer = new Peer();
+            p2pPeer = new Peer();
 
-            peer.on('open', () => {
+            p2pPeer.on('open', (id) => {
+                myPeerId = id;
                 state.isHost = false;
-                p2pConn = peer.connect('sb-p2p-' + code);
-                setupP2pHandlers();
+                const hostConn = p2pPeer.connect('sb-p2p-' + code);
+
+                hostConn.on('open', () => {
+                    peerConnections['host'] = hostConn;
+                    updateP2pStatusUI('connected', '已連線控制中心');
+                    document.getElementById('p2pControls').classList.add('hidden');
+                    document.getElementById('p2pInfo').classList.remove('hidden');
+                    document.getElementById('currentRoomCode').innerText = '已連線';
+                    renderScoreboardUI();
+                });
+
+                hostConn.on('data', (data) => {
+                    handleIncomingData(data, 'host');
+                });
+
+                hostConn.on('close', () => {
+                    alert('與主控台之連線已中斷');
+                    disconnectP2p();
+                });
             });
 
-            peer.on('error', () => {
+            p2pPeer.on('error', () => {
                 alert('連線失敗，請確認房號或網路狀態');
                 updateP2pStatusUI('disconnected', '單機模式');
             });
         }
 
-        function setupP2pHandlers() {
-            p2pConn.on('open', () => {
-                updateP2pStatusUI('connected', '局域網已連線');
-                document.getElementById('p2pControls').classList.add('hidden');
-                document.getElementById('p2pInfo').classList.remove('hidden');
-                document.getElementById('currentRoomCode').innerText = '已連線';
-                
+        function handleIncomingData(data, senderPeerId) {
+            if (data.type === 'SCORE_UPDATE' || data.type === 'STATE_SYNC') {
+                const currentIsHost = state.isHost;
+                state = { ...state, ...data.state, isHost: currentIsHost };
+
+                renderScoreboardUI();
+                saveScoreboardState();
+                playBeepSound(600, 0.05);
+
+                // 如果自己是 Host，幫忙廣播給其他所有已連線 Client
                 if (state.isHost) {
-                    broadcastP2pData({ type: 'STATE_SYNC', state: state });
+                    broadcastP2pData({ type: 'STATE_SYNC', state: state }, senderPeerId);
                 }
-            });
-
-            p2pConn.on('data', (data) => {
-                if (data.type === 'SCORE_UPDATE' || data.type === 'STATE_SYNC') {
-                    // 保留本地 isHost 身份
-                    const currentIsHost = state.isHost;
-                    state = { ...state, ...data.state, isHost: currentIsHost };
-                    renderScoreboardUI();
-                    saveScoreboardState();
-                    playBeepSound(600, 0.05);
-                }
-            });
-
-            p2pConn.on('close', () => {
-                alert('P2P 連線已中斷');
-                disconnectP2p();
-            });
-        }
-
-        function broadcastP2pData(data) {
-            if (p2pConn && p2pConn.open) {
-                p2pConn.send(data);
             }
         }
 
+        function broadcastP2pData(data, excludePeerId = null) {
+            Object.keys(peerConnections).forEach(peerId => {
+                if (peerId !== excludePeerId) {
+                    const conn = peerConnections[peerId];
+                    if (conn && conn.open) {
+                        conn.send(data);
+                    }
+                }
+            });
+        }
+
         function disconnectP2p() {
-            if (p2pConn) p2pConn.close();
-            if (peer) peer.destroy();
-            p2pConn = null;
-            peer = null;
+            Object.keys(peerConnections).forEach(id => {
+                if (peerConnections[id]) peerConnections[id].close();
+            });
+            peerConnections = {};
+
+            if (p2pPeer) p2pPeer.destroy();
+            p2pPeer = null;
             state.isHost = false;
 
             updateP2pStatusUI('disconnected', '單機模式');
@@ -675,7 +846,7 @@
             renderScoreboardUI();
         }
 
-        // --- Drawer Control System ---
+        // --- Drawer Navigation System ---
         const drawers = ['mainSettingsDrawer', 'presetDrawer', 'teamSettingsDrawer'];
 
         function openDrawer(drawerId) {

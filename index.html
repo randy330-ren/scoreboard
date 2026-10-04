@@ -66,7 +66,7 @@
     <!-- Floating Top Control Toolbar -->
     <header class="absolute top-0 left-0 right-0 z-30 flex items-center justify-between p-3 md:p-5 pointer-events-none transition-opacity duration-300 opacity-70 hover:opacity-100">
         <div class="pointer-events-auto flex items-center space-x-2">
-            <button onclick="swapTeams()" class="glass-panel p-3 rounded-2xl text-slate-300/70 hover:text-white transition active:scale-90 flex items-center justify-center shadow-lg md:hidden" title="隊伍對調">
+            <button id="btnSwapTop" onclick="swapTeams()" class="glass-panel p-3 rounded-2xl text-slate-300/70 hover:text-white transition active:scale-90 flex items-center justify-center shadow-lg md:hidden" title="隊伍對調">
                 <i class="fa-solid fa-arrow-right-arrow-left text-base"></i>
             </button>
             <div id="p2pStatus" class="glass-panel px-3 py-1.5 rounded-full text-xs font-semibold text-slate-400 flex items-center gap-2 shadow-lg">
@@ -120,7 +120,7 @@
         </div>
 
         <div class="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 pointer-events-auto hidden md:block">
-            <button onclick="swapTeams()" class="glass-panel px-4 py-2 rounded-2xl text-slate-300/70 hover:text-white transition active:scale-90 flex items-center gap-2 shadow-lg text-xs font-bold" title="隊伍對調">
+            <button id="btnSwapBottom" onclick="swapTeams()" class="glass-panel px-4 py-2 rounded-2xl text-slate-300/70 hover:text-white transition active:scale-90 flex items-center gap-2 shadow-lg text-xs font-bold" title="隊伍對調">
                 <i class="fa-solid fa-arrow-right-arrow-left text-xs"></i>
                 <span>對調</span>
             </button>
@@ -213,12 +213,8 @@
                 </label>
                 <div class="space-y-2 pt-1 border-t border-amber-900/40">
                     <div class="flex items-center justify-between">
-                        <span class="text-xs text-slate-300">預設允許從屬設備控制分數</span>
-                        <input type="checkbox" id="toggleGlobalScoreControl" checked onchange="updateHostGlobalPermissions()" class="w-4 h-4 accent-amber-500 cursor-pointer">
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs text-slate-300">允許從屬設備重置歸零</span>
-                        <input type="checkbox" id="toggleGlobalResetControl" onchange="updateHostGlobalPermissions()" class="w-4 h-4 accent-amber-500 cursor-pointer">
+                        <span class="text-xs text-slate-300">允許所有從屬設備控制 (全功能)</span>
+                        <input type="checkbox" id="toggleGlobalControl" checked onchange="updateHostGlobalPermissions()" class="w-4 h-4 accent-amber-500 cursor-pointer">
                     </div>
                 </div>
 
@@ -235,7 +231,7 @@
             </div>
 
             <!-- 開啟「預設配色庫」抽屜按鈕 -->
-            <button onclick="openDrawer('presetDrawer')" class="w-full p-3 rounded-2xl bg-slate-900 border border-slate-800 hover:border-slate-700 flex items-center justify-between text-slate-200 transition font-semibold text-xs">
+            <button id="btnOpenPreset" onclick="openDrawer('presetDrawer')" class="w-full p-3 rounded-2xl bg-slate-900 border border-slate-800 hover:border-slate-700 flex items-center justify-between text-slate-200 transition font-semibold text-xs">
                 <span class="flex items-center gap-2">
                     <i class="fa-solid fa-palette text-cyan-400"></i> 建議配色方案
                 </span>
@@ -243,7 +239,7 @@
             </button>
 
             <!-- 開啟「隊伍與視覺設定」抽屜按鈕 -->
-            <button onclick="openDrawer('teamSettingsDrawer')" class="w-full p-3 rounded-2xl bg-slate-900 border border-slate-800 hover:border-slate-700 flex items-center justify-between text-slate-200 transition font-semibold text-xs">
+            <button id="btnOpenTeamSettings" onclick="openDrawer('teamSettingsDrawer')" class="w-full p-3 rounded-2xl bg-slate-900 border border-slate-800 hover:border-slate-700 flex items-center justify-between text-slate-200 transition font-semibold text-xs">
                 <span class="flex items-center gap-2">
                     <i class="fa-solid fa-pen-to-square text-rose-400"></i> 隊伍名稱與顏色自訂
                 </span>
@@ -277,7 +273,6 @@
         </div>
 
         <div class="flex-grow overflow-y-auto custom-scrollbar my-4 space-y-3 pr-1 text-xs">
-            <!-- 配色卡片 1 -->
             <button onclick="applyPreset('#2563eb', '#e11d48', '#ffffff', '#ffffff')" class="w-full p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-cyan-500/50 flex items-center justify-between transition group">
                 <span class="font-bold text-slate-200">經典對決 (藍/紅)</span>
                 <div class="flex items-center gap-1.5">
@@ -286,7 +281,6 @@
                 </div>
             </button>
 
-            <!-- 配色卡片 2 -->
             <button onclick="applyPreset('#06b6d4', '#f43f5e', '#ffffff', '#ffffff')" class="w-full p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-cyan-500/50 flex items-center justify-between transition group">
                 <span class="font-bold text-slate-200">霓虹夜彩 (青/粉)</span>
                 <div class="flex items-center gap-1.5">
@@ -295,7 +289,6 @@
                 </div>
             </button>
 
-            <!-- 配色卡片 3 -->
             <button onclick="applyPreset('#059669', '#d97706', '#ffffff', '#ffffff')" class="w-full p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-cyan-500/50 flex items-center justify-between transition group">
                 <span class="font-bold text-slate-200">活力賽事 (綠/橙)</span>
                 <div class="flex items-center gap-1.5">
@@ -304,7 +297,6 @@
                 </div>
             </button>
 
-            <!-- 配色卡片 4 -->
             <button onclick="applyPreset('#1e293b', '#6b21a8', '#38bdf8', '#f472b6')" class="w-full p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-cyan-500/50 flex items-center justify-between transition group">
                 <span class="font-bold text-slate-200">極光暗黑 (黑/紫)</span>
                 <div class="flex items-center gap-1.5">
@@ -328,7 +320,6 @@
         </div>
 
         <div class="flex-grow overflow-y-auto custom-scrollbar my-4 space-y-6 pr-1 text-xs">
-            <!-- Team A Settings -->
             <div class="space-y-3 bg-slate-900/50 p-3.5 rounded-2xl border border-slate-800">
                 <label class="text-xs font-bold text-cyan-400 uppercase tracking-wider block">隊伍 A</label>
                 <div>
@@ -345,7 +336,6 @@
                 </div>
             </div>
 
-            <!-- Team B Settings -->
             <div class="space-y-3 bg-slate-900/50 p-3.5 rounded-2xl border border-slate-800">
                 <label class="text-xs font-bold text-rose-400 uppercase tracking-wider block">隊伍 B</label>
                 <div>
@@ -401,9 +391,8 @@
             bColor: '#e11d48',
             bTextColor: '#ffffff',
             isHost: false,
-            globalAllowScore: true,
-            globalAllowReset: false,
-            devicePermissions: {} // { peerId: { score: boolean, reset: boolean, alias: string } }
+            globalAllowControl: true, // 主控台全域開關：允許從屬設備控制全部功能
+            devicePermissions: {}    // { peerId: boolean } -> 單一設備全功能授權狀態
         };
 
         function initScoreboardState() {
@@ -430,24 +419,14 @@
             localStorage.setItem('ultra_scoreboard_state', JSON.stringify(state));
         }
 
-        // 檢查目前裝置是否具備分數控制權限
-        function checkCanScore() {
-            if (!p2pPeer) return true; // 單機模式允許
-            if (state.isHost) return true; // Host 永遠允許
-            if (state.devicePermissions[myPeerId]) {
-                return state.devicePermissions[myPeerId].score;
+        // 檢查目前裝置是否具備「全功能控制權限」
+        function checkHasControlPermission() {
+            if (!p2pPeer) return true; // 單機模式全開放
+            if (state.isHost) return true; // Host 永遠擁有控制權
+            if (state.devicePermissions[myPeerId] !== undefined) {
+                return state.devicePermissions[myPeerId];
             }
-            return state.globalAllowScore;
-        }
-
-        // 檢查目前裝置是否具備重置歸零權限
-        function checkCanReset() {
-            if (!p2pPeer) return true;
-            if (state.isHost) return true;
-            if (state.devicePermissions[myPeerId]) {
-                return state.devicePermissions[myPeerId].reset;
-            }
-            return state.globalAllowReset;
+            return state.globalAllowControl;
         }
 
         function renderScoreboardUI() {
@@ -471,59 +450,73 @@
             document.getElementById('inputTextColorA').value = state.aTextColor || '#ffffff';
             document.getElementById('inputTextColorB').value = state.bTextColor || '#ffffff';
 
-            document.getElementById('toggleGlobalScoreControl').checked = state.globalAllowScore;
-            document.getElementById('toggleGlobalResetControl').checked = state.globalAllowReset;
+            document.getElementById('toggleGlobalControl').checked = state.globalAllowControl;
 
             renderControlPermissions();
         }
 
         function renderControlPermissions() {
-            const canScore = checkCanScore();
-            const canReset = checkCanReset();
+            const hasPermission = checkHasControlPermission();
 
             const zoneA = document.getElementById('clickZoneA');
             const zoneB = document.getElementById('clickZoneB');
             const btnMinusA = document.getElementById('btnMinusA');
             const btnMinusB = document.getElementById('btnMinusB');
+            const btnSwapTop = document.getElementById('btnSwapTop');
+            const btnSwapBottom = document.getElementById('btnSwapBottom');
             const btnReset = document.getElementById('btnResetScores');
+            const btnOpenPreset = document.getElementById('btnOpenPreset');
+            const btnOpenTeamSettings = document.getElementById('btnOpenTeamSettings');
 
-            // 保持視覺 100% 飽和清晰，僅控制觸控可否點擊
-            if (canScore) {
+            // 1. 主計分區：保持 100% 飽和度，僅鎖定觸控
+            if (hasPermission) {
                 zoneA.style.pointerEvents = 'auto';
                 zoneB.style.pointerEvents = 'auto';
                 btnMinusA.style.pointerEvents = 'auto';
                 btnMinusB.style.pointerEvents = 'auto';
+                btnSwapTop.style.pointerEvents = 'auto';
+                btnSwapBottom.style.pointerEvents = 'auto';
+                btnSwapTop.classList.remove('opacity-40');
+                btnSwapBottom.classList.remove('opacity-40');
             } else {
                 zoneA.style.pointerEvents = 'none';
                 zoneB.style.pointerEvents = 'none';
                 btnMinusA.style.pointerEvents = 'none';
                 btnMinusB.style.pointerEvents = 'none';
+                btnSwapTop.style.pointerEvents = 'none';
+                btnSwapBottom.style.pointerEvents = 'none';
+                btnSwapTop.classList.add('opacity-40');
+                btnSwapBottom.classList.add('opacity-40');
             }
 
-            // 重置按鈕權限 UI
-            if (canReset) {
+            // 2. 側邊欄按鈕權限 (重置歸零、配色抽屜、隊伍自訂)
+            if (hasPermission) {
                 btnReset.removeAttribute('disabled');
+                btnOpenPreset.removeAttribute('disabled');
+                btnOpenTeamSettings.removeAttribute('disabled');
                 btnReset.classList.remove('opacity-40', 'cursor-not-allowed');
+                btnOpenPreset.classList.remove('opacity-40', 'cursor-not-allowed');
+                btnOpenTeamSettings.classList.remove('opacity-40', 'cursor-not-allowed');
             } else {
                 btnReset.setAttribute('disabled', 'true');
+                btnOpenPreset.setAttribute('disabled', 'true');
+                btnOpenTeamSettings.setAttribute('disabled', 'true');
                 btnReset.classList.add('opacity-40', 'cursor-not-allowed');
+                btnOpenPreset.classList.add('opacity-40', 'cursor-not-allowed');
+                btnOpenTeamSettings.classList.add('opacity-40', 'cursor-not-allowed');
             }
 
-            // Client 端設定側欄權限提示卡片
+            // 3. Client 端權限提示卡片
             const clientNotice = document.getElementById('clientPermissionNotice');
             if (!state.isHost && p2pPeer) {
                 clientNotice.classList.remove('hidden');
                 const titleElem = document.getElementById('noticeTitle');
                 const descElem = document.getElementById('noticeDesc');
 
-                if (canScore && canReset) {
+                if (hasPermission) {
                     titleElem.className = 'font-bold text-emerald-400 flex items-center gap-2';
                     titleElem.innerHTML = '<i class="fa-solid fa-circle-check"></i> 完整控制權限';
-                    descElem.innerText = '主控台已授權：可加減分與重置分數。';
-                } else if (canScore) {
-                    titleElem.className = 'font-bold text-amber-400 flex items-center gap-2';
-                    titleElem.innerHTML = '<i class="fa-solid fa-pen-to-square"></i> 僅限計分權限';
-                    descElem.innerText = '可點擊加減分 (重置分數已被主控台鎖定)。';
+                    descElem.innerText = '主控台已授權：可操作分數、換配色、對調隊伍與重置。';
                 } else {
                     titleElem.className = 'font-bold text-rose-400 flex items-center gap-2';
                     titleElem.innerHTML = '<i class="fa-solid fa-lock"></i> 僅限純觀看模式';
@@ -535,7 +528,7 @@
         }
 
         function updateScore(teamKey, delta, isFromRemote = false) {
-            if (!isFromRemote && !checkCanScore()) return;
+            if (!isFromRemote && !checkHasControlPermission()) return;
 
             const isTeamA = teamKey === 'A';
             const currentVal = isTeamA ? state.aScore : state.bScore;
@@ -565,7 +558,7 @@
         }
 
         function swapTeams() {
-            if (!checkCanScore()) return;
+            if (!checkHasControlPermission()) return;
             const tempName = state.aName, tempScore = state.aScore, tempColor = state.aColor, tempTextColor = state.aTextColor;
             state.aName = state.bName; state.aScore = state.bScore; state.aColor = state.bColor; state.aTextColor = state.bTextColor;
             state.bName = tempName; state.bScore = tempScore; state.bColor = tempColor; state.bTextColor = tempTextColor;
@@ -577,7 +570,7 @@
         }
 
         function resetScores() {
-            if (!checkCanReset()) return;
+            if (!checkHasControlPermission()) return;
             state.aScore = 0; state.bScore = 0;
             playBeepSound(420, 0.12);
             renderScoreboardUI();
@@ -586,6 +579,7 @@
         }
 
         function updateSettingsFromInputs() {
+            if (!checkHasControlPermission()) return;
             state.aName = document.getElementById('inputNameA').value.trim() || '藍隊';
             state.bName = document.getElementById('inputNameB').value.trim() || '紅隊';
             state.aColor = document.getElementById('inputColorA').value;
@@ -599,6 +593,7 @@
         }
 
         function applyPreset(colorA, colorB, textColorA = '#ffffff', textColorB = '#ffffff') {
+            if (!checkHasControlPermission()) return;
             state.aColor = colorA;
             state.bColor = colorB;
             state.aTextColor = textColorA;
@@ -611,24 +606,22 @@
 
         function updateHostGlobalPermissions() {
             if (!state.isHost) return;
-            state.globalAllowScore = document.getElementById('toggleGlobalScoreControl').checked;
-            state.globalAllowReset = document.getElementById('toggleGlobalResetControl').checked;
+            state.globalAllowControl = document.getElementById('toggleGlobalControl').checked;
 
-            // 更新同步至所有設備
+            // 全域修改時更新給所有從屬設備
             renderScoreboardUI();
+            renderHostDeviceListUI();
             broadcastP2pData({ type: 'STATE_SYNC', state: state });
         }
 
-        function toggleSingleDevicePermission(targetPeerId, permType) {
+        function toggleSingleDevicePermission(targetPeerId) {
             if (!state.isHost) return;
-            if (!state.devicePermissions[targetPeerId]) {
-                state.devicePermissions[targetPeerId] = {
-                    score: state.globalAllowScore,
-                    reset: state.globalAllowReset,
-                    alias: `設備 ${targetPeerId.substring(targetPeerId.length - 4)}`
-                };
-            }
-            state.devicePermissions[targetPeerId][permType] = !state.devicePermissions[targetPeerId][permType];
+            
+            const currentPerm = state.devicePermissions[targetPeerId] !== undefined ? 
+                                state.devicePermissions[targetPeerId] : 
+                                state.globalAllowControl;
+
+            state.devicePermissions[targetPeerId] = !currentPerm;
 
             renderHostDeviceListUI();
             broadcastP2pData({ type: 'STATE_SYNC', state: state });
@@ -636,7 +629,7 @@
 
         // --- Multi-Client P2P WebRTC Core ---
         let p2pPeer = null;
-        let peerConnections = {}; // Key: peerId, Value: connection
+        let peerConnections = {};
 
         function updateP2pStatusUI(status, text) {
             const dot = document.getElementById('statusDot');
@@ -679,12 +672,11 @@
                 return;
             }
 
-            container.innerHTML = peerIds.map((id, idx) => {
+            container.innerHTML = peerIds.map((id) => {
                 const shortId = id.substring(id.length - 4).toUpperCase();
-                const perm = state.devicePermissions[id] || {
-                    score: state.globalAllowScore,
-                    reset: state.globalAllowReset
-                };
+                const isAllowed = state.devicePermissions[id] !== undefined ? 
+                                  state.devicePermissions[id] : 
+                                  state.globalAllowControl;
 
                 return `
                     <div class="p-2 rounded-xl bg-slate-900/90 border border-slate-800 flex items-center justify-between text-xs">
@@ -692,16 +684,10 @@
                             <i class="fa-solid fa-mobile-screen text-amber-400"></i>
                             <span class="font-mono text-[11px] text-slate-300">📱裝置 (${shortId})</span>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <label class="flex items-center gap-1 cursor-pointer" title="控制分數">
-                                <span class="text-[10px] text-slate-400">計分</span>
-                                <input type="checkbox" ${perm.score ? 'checked' : ''} onchange="toggleSingleDevicePermission('${id}', 'score')" class="w-3.5 h-3.5 accent-cyan-500">
-                            </label>
-                            <label class="flex items-center gap-1 cursor-pointer" title="重置歸零">
-                                <span class="text-[10px] text-slate-400">歸零</span>
-                                <input type="checkbox" ${perm.reset ? 'checked' : ''} onchange="toggleSingleDevicePermission('${id}', 'reset')" class="w-3.5 h-3.5 accent-rose-500">
-                            </label>
-                        </div>
+                        <label class="flex items-center gap-1.5 cursor-pointer" title="操作授權">
+                            <span class="text-[10px] ${isAllowed ? 'text-amber-400 font-bold' : 'text-slate-500'}">${isAllowed ? '可操作' : '已鎖定'}</span>
+                            <input type="checkbox" ${isAllowed ? 'checked' : ''} onchange="toggleSingleDevicePermission('${id}')" class="w-4 h-4 accent-amber-500 cursor-pointer">
+                        </label>
                     </div>
                 `;
             }).join('');
@@ -732,12 +718,8 @@
                 conn.on('open', () => {
                     peerConnections[conn.peer] = conn;
 
-                    if (!state.devicePermissions[conn.peer]) {
-                        state.devicePermissions[conn.peer] = {
-                            score: state.globalAllowScore,
-                            reset: state.globalAllowReset,
-                            alias: `設備 ${conn.peer.substring(conn.peer.length - 4)}`
-                        };
+                    if (state.devicePermissions[conn.peer] === undefined) {
+                        state.devicePermissions[conn.peer] = state.globalAllowControl;
                     }
 
                     renderHostDeviceListUI();
@@ -809,7 +791,6 @@
                 saveScoreboardState();
                 playBeepSound(600, 0.05);
 
-                // 如果自己是 Host，幫忙廣播給其他所有已連線 Client
                 if (state.isHost) {
                     broadcastP2pData({ type: 'STATE_SYNC', state: state }, senderPeerId);
                 }
@@ -850,6 +831,9 @@
         const drawers = ['mainSettingsDrawer', 'presetDrawer', 'teamSettingsDrawer'];
 
         function openDrawer(drawerId) {
+            // 被鎖定時不允許開啟預設配色與隊伍設定抽屜
+            if (drawerId !== 'mainSettingsDrawer' && !checkHasControlPermission()) return;
+
             const overlay = document.getElementById('drawerOverlay');
             overlay.classList.remove('hidden');
 

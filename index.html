@@ -606,9 +606,14 @@
 
         function updateHostGlobalPermissions() {
             if (!state.isHost) return;
-            state.globalAllowControl = document.getElementById('toggleGlobalControl').checked;
+            const isGlobalChecked = document.getElementById('toggleGlobalControl').checked;
+            state.globalAllowControl = isGlobalChecked;
 
-            // 全域修改時更新給所有從屬設備
+            // 全域開關變更時，強制將下方所有已連線設備清單批次全選或全取消
+            Object.keys(peerConnections).forEach(peerId => {
+                state.devicePermissions[peerId] = isGlobalChecked;
+            });
+
             renderScoreboardUI();
             renderHostDeviceListUI();
             broadcastP2pData({ type: 'STATE_SYNC', state: state });
@@ -621,7 +626,18 @@
                                 state.devicePermissions[targetPeerId] : 
                                 state.globalAllowControl;
 
-            state.devicePermissions[targetPeerId] = !currentPerm;
+            const newPerm = !currentPerm;
+            state.devicePermissions[targetPeerId] = newPerm;
+
+            // 檢查下方清單是否已全部勾選，自動反向更新「全域開關」的勾選狀態
+            const peerIds = Object.keys(peerConnections);
+            if (peerIds.length > 0) {
+                const allChecked = peerIds.every(id => 
+                    state.devicePermissions[id] !== undefined ? state.devicePermissions[id] : state.globalAllowControl
+                );
+                state.globalAllowControl = allChecked;
+                document.getElementById('toggleGlobalControl').checked = allChecked;
+            }
 
             renderHostDeviceListUI();
             broadcastP2pData({ type: 'STATE_SYNC', state: state });
